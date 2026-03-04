@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Attendance</title>
+  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-content">
+        <img src="assets/ican-logo.png" alt="Logo" class="header-logo">
+        <h1>Teacher Attendance</h1>
+      </div>
+      <div class="date-display">
+        <span id="currentDate"></span>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-button active" data-tab="attendance">Mark Attendance</button>
+      <button class="tab-button" data-tab="daily-report">Daily Report</button>
+      <button class="tab-button" data-tab="individual">Individual Records</button>
+      <button class="tab-button" data-tab="overview">Overview</button>
+    </nav>
+
+    <!-- Mark Attendance Tab -->
+    <div id="attendance-tab" class="tab-content active">
+      <div class="section">
+        <div class="date-navigation">
+          <button id="prevDayBtn" class="btn btn-secondary">← Previous Day</button>
+          <div class="date-picker-container">
+            <label for="selectedDate">Select Date:</label>
+            <input type="date" id="selectedDate" class="date-input">
+          </div>
+          <button id="nextDayBtn" class="btn btn-secondary">Next Day →</button>
+        </div>
+
+        <div class="section-header">
+          <div>
+            <h2>Teachers</h2>
+            <p style="color: #6c757d; font-size: 0.9rem; margin-top: 5px;">
+              <span id="dateContext">Select a date and import teachers from Notion</span><br>
+              <span style="font-size: 0.85rem; color: #868e96;">Attendance auto-saves • Click "Import from Notion" to refresh teacher list</span>
+            </p>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button id="clearDataBtn" class="btn btn-secondary">Clear Data</button>
+            <button id="loadTeachersBtn" class="btn btn-primary">Import from Notion</button>
+          </div>
+        </div>
+
+        <div id="teachersList" class="teachers-list">
+          <div class="info-text">Select a date and click "Import from Notion" to load teachers</div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="submitAttendanceBtn" class="btn btn-primary" style="display: none;" disabled>Submit Attendance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Report Tab -->
+    <div id="daily-report-tab" class="tab-content">
+      <div class="section">
+        <h2>Daily Attendance Report</h2>
+
+        <div class="report-controls">
+          <label>
+            Select Date:
+            <input type="date" id="reportDate" />
+          </label>
+          <button id="loadDailyReportBtn" class="btn btn-secondary">Load Report</button>
+        </div>
+
+        <div class="report-filter-controls" id="reportFilterControls" style="display: none;">
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <!-- Status Filters -->
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+              <strong>Status:</strong>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterAll" class="filter-checkbox" checked>
+                All
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterPresent" class="filter-checkbox" checked>
+                Present
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterLate" class="filter-checkbox" checked>
+                Late
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterAbsent" class="filter-checkbox" checked>
+                Absent
+              </label>
+            </div>
+
+            <!-- Shift Filters -->
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+              <strong>Shift:</strong>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterAllShifts" class="filter-checkbox" checked>
+                All Shifts
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterShift8am" class="filter-checkbox" checked>
+                8am
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterShift10am" class="filter-checkbox" checked>
+                10am
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterShift1pm" class="filter-checkbox" checked>
+                1pm
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterShift3pm" class="filter-checkbox" checked>
+                3pm
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterShift5pm" class="filter-checkbox" checked>
+                5pm
+              </label>
+              <label style="display: flex; align-items: center; gap: 5px;">
+                <input type="checkbox" id="filterShift7pm" class="filter-checkbox" checked>
+                7pm
+              </label>
+            </div>
+
+            <!-- Download Button -->
+            <div style="display: flex; justify-content: flex-end;">
+              <button id="downloadReportBtn" class="btn btn-primary">📷 Download as Image</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="dailyReportContent" class="report-content">
+          <p class="info-text">Select a date and click "Load Report" to view attendance.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Individual Records Tab -->
+    <div id="individual-tab" class="tab-content">
+      <div class="section">
+        <h2>Individual Teacher Records</h2>
+
+        <div class="report-controls" style="align-items: flex-end;">
+          <label>
+            Select Teacher:
+            <select id="individualTeacherSelect" class="modal-select" style="min-width: 250px; margin-bottom: 0;">
+              <option value="">-- Select a Teacher --</option>
+              <!-- Populated by JavaScript -->
+            </select>
+          </label>
+          <label>
+            From:
+            <div style="display: flex; gap: 5px;">
+              <input type="date" id="individualStartDate" />
+              <button type="button" class="btn btn-secondary" style="padding: 8px 12px;" onclick="document.getElementById('individualStartDate').value = '';" title="Clear date">✕</button>
+            </div>
+          </label>
+          <label>
+            To:
+            <div style="display: flex; gap: 5px;">
+              <input type="date" id="individualEndDate" />
+              <button type="button" class="btn btn-secondary" style="padding: 8px 12px;" onclick="document.getElementById('individualEndDate').value = '';" title="Clear date">✕</button>
+            </div>
+          </label>
+          <button id="loadIndividualRecordsBtn" class="btn btn-secondary">Load Records</button>
+          <button id="downloadIndividualRecordsBtn" class="btn btn-primary" style="display: none;">📷 Download as Image</button>
+        </div>
+
+        <!-- Individual Summary Stats -->
+        <div id="individualSummary" class="individual-summary" style="display: none;">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Individual Records Table -->
+        <div id="individualRecordsContent" class="report-content">
+          <p class="info-text">Select a teacher from the dropdown to view their attendance history.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="overview-tab" class="tab-content">
+      <div class="section">
+        <h2>Analytics Dashboard</h2>
+
+        <div class="report-controls">
+          <label>
+            From:
+            <input type="date" id="overviewStartDate" />
+          </label>
+          <label>
+            To:
+            <input type="date" id="overviewEndDate" />
+          </label>
+          <button id="loadOverviewBtn" class="btn btn-secondary">Load Analytics</button>
+          <button id="exportCsvBtn" class="btn btn-primary">Export CSV</button>
+          <button id="downloadAnalyticsBtn" class="btn btn-primary">📷 Download Analytics</button>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div id="overviewSummary" class="summary-section"></div>
+
+        <!-- Charts Section -->
+        <div class="analytics-charts-section">
+          <div class="chart-row">
+            <div class="chart-container">
+              <h3>Daily Attendance Trend</h3>
+              <p class="chart-subtitle">Track attendance changes over time</p>
+              <canvas id="trendChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Status Distribution</h3>
+              <p class="chart-subtitle">Overall attendance breakdown</p>
+              <canvas id="statusPieChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-row">
+            <div class="chart-container">
+              <h3>Late Reasons Breakdown</h3>
+              <p class="chart-subtitle">Most common reasons for tardiness</p>
+              <canvas id="lateReasonsChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Absent Reasons Breakdown</h3>
+              <p class="chart-subtitle">Most common reasons for absence</p>
+              <canvas id="absentReasonsChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-row">
+            <div class="chart-container">
+              <h3>Undertime Reasons</h3>
+              <p class="chart-subtitle">Why teachers left early</p>
+              <canvas id="undertimeReasonsChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Shift Performance</h3>
+              <p class="chart-subtitle">Attendance by work shift</p>
+              <canvas id="shiftChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-row">
+            <div class="chart-container">
+              <h3>Day of Week Patterns</h3>
+              <p class="chart-subtitle">Attendance issues by weekday</p>
+              <canvas id="dayOfWeekChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Shift & Day Heatmap</h3>
+              <p class="chart-subtitle">Problem areas by shift and weekday</p>
+              <canvas id="shiftDayHeatmap"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-row">
+            <div class="chart-container" style="grid-column: 1 / -1;">
+              <h3>Individual Teacher Attendance Breakdown</h3>
+              <p class="chart-subtitle">Performance comparison across all teachers (Purple = Official Sick/Vacation Leave)</p>
+              <canvas id="teacherBreakdownChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teacher Insights -->
+        <div id="teacherInsights" class="insights-section"></div>
+
+        <!-- Substitute Coverage -->
+        <div id="substituteCoverage" class="insights-section"></div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Teacher Attendance System - <span id="footerYear"></span></p>
+    </footer>
+  </div>
+
+  <!-- Late Reason Modal -->
+  <div id="lateModal" class="modal">
+    <div class="modal-content modal-large">
+      <h3>Late Reason</h3>
+      <p class="modal-teacher-name" id="lateTeacherName"></p>
+
+      <div style="margin-bottom: 15px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="lateNotifiedCheckbox" style="cursor: pointer;">
+          <span>Teacher notified about being late</span>
+        </label>
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <label for="lateMinutesInput">⏱️ Minutes Late:</label>
+        <input type="number" id="lateMinutesInput" class="modal-input" placeholder="Enter minutes" min="1" step="1">
+      </div>
+
+      <label for="lateReasonSelect">Select Reason:</label>
+      <select id="lateReasonSelect" class="modal-select">
+        <!-- Populated by JavaScript -->
+      </select>
+
+      <div id="lateCustomReasonContainer" style="display: none; margin-top: 10px;">
+        <label for="lateCustomReason">Specify reason:</label>
+        <input type="text" id="lateCustomReason" class="modal-input" placeholder="Enter custom reason">
+      </div>
+
+      <h4 style="margin-top: 20px;">Class Schedule & Substitutes</h4>
+      <div style="margin-bottom: 15px;">
+        <button id="aiAutoFillLateBtn" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+          ✨ AI Auto-Fill Substitutes
+        </button>
+        <span id="aiAutoFillLateStatus" style="margin-left: 10px; font-style: italic; color: #666;"></span>
+      </div>
+      <div id="lateClassSlotsList">
+        <!-- Populated by JavaScript -->
+      </div>
+
+      <div class="modal-buttons">
+        <button id="lateSaveBtn" class="btn btn-primary">Save</button>
+        <button id="lateCancelBtn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Absent Details Modal -->
+  <div id="absentModal" class="modal">
+    <div class="modal-content modal-large">
+      <h3>Absent Details</h3>
+      <p class="modal-teacher-name" id="absentTeacherName"></p>
+
+      <label for="absentReasonSelect">Reason for Absence:</label>
+      <select id="absentReasonSelect" class="modal-select">
+        <!-- Populated by JavaScript -->
+      </select>
+
+      <div id="absentCustomReasonContainer" style="display: none; margin-top: 10px;">
+        <label for="absentCustomReason">Specify reason:</label>
+        <input type="text" id="absentCustomReason" class="modal-input" placeholder="Enter custom reason">
+      </div>
+
+      <h4 style="margin-top: 20px;">Class Schedule & Substitutes</h4>
+      <div style="margin-bottom: 15px;">
+        <button id="aiAutoFillAbsentBtn" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+          ✨ AI Auto-Fill Substitutes
+        </button>
+        <span id="aiAutoFillAbsentStatus" style="margin-left: 10px; font-style: italic; color: #666;"></span>
+      </div>
+      <div id="classSlotsList">
+        <!-- Populated by JavaScript -->
+      </div>
+
+      <div class="modal-buttons">
+        <button id="absentSaveBtn" class="btn btn-primary">Save</button>
+        <button id="absentCancelBtn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Undertime Modal -->
+  <div id="undertimeModal" class="modal">
+    <div class="modal-content modal-large">
+      <h3>Undertime / Left Early</h3>
+      <p class="modal-teacher-name" id="undertimeTeacherName"></p>
+
+      <div style="margin-bottom: 15px;">
+        <label for="undertimeMinutesInput">⏱️ Minutes Early (left before shift end):</label>
+        <input type="number" id="undertimeMinutesInput" class="modal-input" placeholder="Enter minutes" min="1" step="1">
+      </div>
+
+      <label for="undertimeReasonSelect">Reason for Leaving Early:</label>
+      <select id="undertimeReasonSelect" class="modal-select">
+        <!-- Populated by JavaScript -->
+      </select>
+
+      <div id="undertimeCustomReasonContainer" style="display: none; margin-top: 10px;">
+        <label for="undertimeCustomReason">Specify reason:</label>
+        <input type="text" id="undertimeCustomReason" class="modal-input" placeholder="Enter custom reason">
+      </div>
+
+      <h4 style="margin-top: 20px;">Class Schedule & Substitutes (Remaining Classes)</h4>
+      <div style="margin-bottom: 15px;">
+        <button id="aiAutoFillUndertimeBtn" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+          ✨ AI Auto-Fill Substitutes
+        </button>
+        <span id="aiAutoFillUndertimeStatus" style="margin-left: 10px; font-style: italic; color: #666;"></span>
+      </div>
+      <div id="undertimeClassSlotsList">
+        <!-- Populated by JavaScript -->
+      </div>
+
+      <div class="modal-buttons">
+        <button id="undertimeSaveBtn" class="btn btn-primary">Save</button>
+        <button id="undertimeCancelBtn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="helpers.js?v=17"></script>
+  <script src="modal-handler.js?v=17"></script>
+  <script src="undertime-modal.js?v=17"></script>
+  <script src="app.js?v=17"></script>
+  <script src="analytics.js?v=17"></script>
+</body>
+</html>
